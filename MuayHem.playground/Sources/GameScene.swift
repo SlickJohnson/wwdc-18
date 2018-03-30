@@ -36,17 +36,34 @@ private extension GameScene {
   /// Creates and adds the SKShapeNode for the ground.
   func makeGround() {
     let groundSize = CGSize(width: size.width, height: 40)
+    let groundCenter = CGPoint(x: groundSize.width / 2, y: groundSize.height / 2)
     ground = SKShapeNode(rect: CGRect(x: 0, y: 0, width: groundSize.width, height: groundSize.height))
     ground.fillColor = .black
+    ground.strokeColor = .black
+    // Configure SKPhysicsBody
+    let physicsBody = SKPhysicsBody(rectangleOf: groundSize, center: groundCenter)
+    physicsBody.isDynamic = false
+    physicsBody.categoryBitMask = 1
+    physicsBody.collisionBitMask = 0
+    ground.physicsBody = physicsBody
     addChild(ground)
   }
 
   /// Creates and adds the SKShapeNode for the player.
   func makePlayer() {
+    // Create the SKShapeNode
     let playerRadius: CGFloat = 20
     player = SKShapeNode(circleOfRadius: playerRadius)
     player.position = CGPoint(x: size.width / 2, y: size.height / 2)
     player.fillColor = .red
+    player.strokeColor = .red
+    // Configure SKPhysicsBody
+    let physicsBody = SKPhysicsBody(circleOfRadius: playerRadius)
+    physicsBody.affectedByGravity = true
+    physicsBody.categoryBitMask = 0
+    physicsBody.collisionBitMask = 1
+    player.physicsBody = physicsBody
+
     addChild(player)
   }
 }
@@ -62,3 +79,6 @@ public extension GameScene {
   public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 }
+
+
+
