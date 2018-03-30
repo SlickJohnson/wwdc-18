@@ -2,9 +2,13 @@ import Foundation
 import SpriteKit
 
 public class GameScene: SKScene {
+  /// The SKShapeNode that represents the ground at the bottom of game screen.
+  var ground: SKShapeNode!
+
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
     backgroundColor = color
+    setupScene()
   }
 
   public required init?(coder aDecoder: NSCoder) {
@@ -19,31 +23,25 @@ public class GameScene: SKScene {
   }
 }
 
+// MARK: - Helper methodsbefore
+private extension GameScene {
+  /// Configure the game scene with a ground and player.
+  func setupScene() {
+    let groundSize = CGSize(width: size.width, height: 40)
+    ground = SKShapeNode(rect: CGRect(x: 0, y: 0, width: groundSize.width, height: groundSize.height))
+    ground.fillColor = .black
+    addChild(ground)
+  }
+}
+
 // MARK: - Game controls
 public extension GameScene {
-  public override func mouseDown(with event: NSEvent) {
-    touchDown(atPoint: event.location(in: self))
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 
-  public override func mouseDragged(with event: NSEvent) {
-    touchMoved(toPoint: event.location(in: self))
+  public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 
-  public override func mouseUp(with event: NSEvent) {
-    touchUp(atPoint: event.location(in: self))
+  public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 }
-
-// MARK: - Touch handling
-private extension GameScene {
-  func touchDown(atPoint pos : CGPoint) {
-  }
-
-  func touchMoved(toPoint pos : CGPoint) {
-  }
-
-  func touchUp(atPoint pos : CGPoint) {
-  }
-}
-
-
