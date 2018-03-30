@@ -6,6 +6,12 @@ public class GameScene: SKScene {
   var ground: SKShapeNode!
   /// The SKShapeNode that represents the player and responds to touch events.
   var player: SKShapeNode!
+  // The multiplier that will be applied to player's gravity to create "heaviness".
+  let fallMultiplier: CGFloat = 1.3
+  // The multiplier that will be applied to player's gravity to elongate player jump.
+  let lowJumpMultiplier: CGFloat = 1.0425
+  // Bool that keeps track of whether or not a finger is touching the screen.
+  var touchDown: Bool = false
 
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
@@ -21,12 +27,14 @@ public class GameScene: SKScene {
   }
 
   public override func update(_ currentTime: TimeInterval) {
-    // Called before each frame is rendered
+    guard let playerPhysicsBody = player.physicsBody else { return }
+    applyGravityMultipliers(to: playerPhysicsBody)
   }
 }
 
 // MARK: - Helper methodsbefore
 private extension GameScene {
+  // MARK: Setup
   /// Configure the game scene with a ground and player.
   func setupScene() {
     makeGround()
@@ -66,19 +74,42 @@ private extension GameScene {
 
     addChild(player)
   }
+
+  // MARK: Game play
+  /// Applies an impulse to an SKPhysicsBody to influence it's trajectory.
+  ///
+  /// - Parameter physicsBody: The SKPhysicsBody who's projectile trajectory will be influenced.
+  func applyGravityMultipliers(to physicsBody: SKPhysicsBody) {
+    if physicsBody.velocity.dy < 0 {
+      physicsBody.applyImpulse(CGVector(dx: 0, dy: physicsWorld.gravity.dy * (fallMultiplier - 1)))
+    } else if physicsBody.velocity.dy > 0 {
+      physicsBody.applyImpulse(CGVector(dx: 0, dy: physicsWorld.gravity.dy * (lowJumpMultiplier - 1)))
+    }
+  }
 }
 
 // MARK: - Game controls
 public extension GameScene {
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard let touch = touches.first else { return }
+    let touchLocation = touch.location(in: self)
+    touchDown = true
+    // Calculate angle between player and finger.
+    let dx = touchLocation.x - player.position.x
+    let dy = touchLocation.y - player.position.y
+    //    let angle = atan2(dy, dx)
+    //    let vx = cos(angle) * 10000
+    //    let vy = sin(angle) * 10000
+    let jumpVector = CGVector(dx: dx * 15, dy: dy * 15)
+    guard let playerPhysicsBody = player.physicsBody else { return }
+    guard playerPhysicsBody.velocity.dy >= 0 else { return }
+    playerPhysicsBody.applyForce(jumpVector)
   }
 
   public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 
   public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    touchDown = false
   }
 }
-
-
-
