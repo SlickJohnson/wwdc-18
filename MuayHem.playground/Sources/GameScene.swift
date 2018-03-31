@@ -6,12 +6,16 @@ public class GameScene: SKScene {
   var ground: SKShapeNode!
   /// The SKShapeNode that represents the player and responds to touch events.
   var player: SKShapeNode!
-  // The multiplier that will be applied to player's gravity to create "heaviness".
+  /// The multiplier that will be applied to player's gravity to create "heaviness".
   let fallMultiplier: CGFloat = 1.3
-  // The multiplier that will be applied to player's gravity to elongate player jump.
+  /// The multiplier that will be applied to player's gravity to elongate player jump.
   let lowJumpMultiplier: CGFloat = 1.0425
-  // Bool that keeps track of whether or not a finger is touching the screen.
+  /// Bool that keeps track of whether or not a finger is touching the screen.
   var touchDown: Bool = false
+  /// The cam used to control the zoom levels
+  var cam: SKCameraNode!
+  /// The camera's scale
+  var camScale: CGFloat = 2
 
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
@@ -39,11 +43,12 @@ private extension GameScene {
   func setupScene() {
     makeGround()
     makePlayer()
+    setupCam()
   }
 
   /// Creates and adds the SKShapeNode for the ground.
   func makeGround() {
-    let groundSize = CGSize(width: size.width, height: 40)
+    let groundSize = CGSize(width: size.width * 1.3, height: 40)
     let groundCenter = CGPoint(x: groundSize.width / 2, y: groundSize.height / 2)
     ground = SKShapeNode(rect: CGRect(x: 0, y: 0, width: groundSize.width, height: groundSize.height))
     ground.fillColor = .black
@@ -75,6 +80,14 @@ private extension GameScene {
     addChild(player)
   }
 
+  func setupCam() {
+    cam = SKCameraNode()
+    cam.position = CGPoint(x: size.width / 2, y: size.height / 2)
+    self.camera = cam
+    cam.setScale(camScale)
+    addChild(cam)
+  }
+
   // MARK: Game play
   /// Applies an impulse to an SKPhysicsBody to influence it's trajectory.
   ///
@@ -97,12 +110,11 @@ public extension GameScene {
     // Calculate angle between player and finger.
     let dx = touchLocation.x - player.position.x
     let dy = touchLocation.y - player.position.y
-    //    let angle = atan2(dy, dx)
-    //    let vx = cos(angle) * 10000
-    //    let vy = sin(angle) * 10000
-    let jumpVector = CGVector(dx: dx * 15, dy: dy * 15)
+
     guard let playerPhysicsBody = player.physicsBody else { return }
     guard playerPhysicsBody.velocity.dy >= 0 else { return }
+
+    let jumpVector = CGVector(dx: dx * 12, dy: dy * 12)
     playerPhysicsBody.applyForce(jumpVector)
   }
 
@@ -113,3 +125,6 @@ public extension GameScene {
     touchDown = false
   }
 }
+
+
+
