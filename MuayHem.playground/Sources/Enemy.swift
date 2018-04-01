@@ -3,7 +3,13 @@ import SpriteKit
 
 public class Enemy: SKSpriteNode {
   /// The number of hits remaining to destroy the enemy.
-  var hitPoints: Int = 3
+  var hitPoints: Int = 3 {
+    didSet {
+      if hitPoints <= 0 {
+        removeFromParent()
+      }
+    }
+  }
 
   public init(size: CGSize, position: CGPoint) {
     super.init(texture: nil, color: .orange, size: size)
