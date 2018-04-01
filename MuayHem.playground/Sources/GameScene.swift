@@ -16,8 +16,6 @@ public class GameScene: SKScene {
   var cam: SKCameraNode!
   /// The camera's scale.
   var camScale: CGFloat = 2
-  /// The object that acts as a dummy enemy in the game scene.
-  var enemy: Enemy!
 
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
@@ -46,7 +44,7 @@ private extension GameScene {
   func setupScene() {
     makeGround()
     makePlayer()
-    makeDummy()
+    beginMakingEnemies()
     setupCam()
   }
 
@@ -72,16 +70,23 @@ private extension GameScene {
     addChild(player)
   }
 
-  /// Creates the dummy objects to test player attaching mechanic.
-  func makeDummy() {
-    enemy = Enemy(size: CGSize(width: 80, height: 80), position: CGPoint(x: size.width / 2, y: size.height / 1.25))
-    addChild(enemy)
+  /// Starts the SKAction that spawns enemies on an interval.
+  func beginMakingEnemies() {
+    //
+    let makeEnemyAction = SKAction.run { [unowned self] in
+      let enemySize = CGSize(width: 80, height: 80)
+      let enemyPosition = CGPoint(x: self.size.width / 2, y: self.size.height / 1.25)
+      let enemy = Enemy(size: enemySize, position: enemyPosition)
+      self.addChild(enemy)
+    }
+    let makeEnemiesSequence = SKAction.sequence([SKAction.wait(forDuration: 2), makeEnemyAction])
+    run(SKAction.repeatForever(makeEnemiesSequence))
   }
 
   func setupCam() {
     cam = SKCameraNode()
     cam.position = CGPoint(x: size.width / 2, y: size.height / 2)
-    self.camera = cam
+    camera = cam
     cam.setScale(camScale)
     addChild(cam)
   }
@@ -128,10 +133,12 @@ public extension GameScene {
     let touchLocation = touch.location(in: self)
     touchDown = true
     if player.isAttached {
-      player.attack(touchLocation) { isTargetDestroyed in
-        guard let playerJoint = player.joint else { return }
-        scene?.physicsWorld.remove(playerJoint)
-        player.joint = nil
+      player.attack(touchLocation) { isEnemyDestroyed in
+        if isEnemyDestroyed {
+          guard let playerJoint = player.joint else { return }
+          scene?.physicsWorld.remove(playerJoint)
+          player.joint = nil
+        }
       }
     } else {
       player.jump(to: touchLocation)

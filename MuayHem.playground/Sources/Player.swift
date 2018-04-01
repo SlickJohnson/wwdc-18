@@ -49,20 +49,21 @@ public extension Player {
   /// Attacks the current node that the player is attached to.
   ///
   /// - Parameter location: The direction the player will move after target is destroyed.
-  public func attack(_ touchLocation: CGPoint, isTargetDestroyed: (Bool) -> ()) {
+  public func attack(_ touchLocation: CGPoint, hasPlayerDestroyedTarget: (Bool) -> ()) {
     guard let joint = joint else { return }
     guard let physicsBody = physicsBody else { return }
-    var target: SKNode!
-    if joint.bodyA.node == self {
-      target = joint.bodyB.node
-    } else {
-      target = joint.bodyA.node
+    // Grab the enemy node
+    var target = joint.bodyB.node as? Enemy
+    if target == nil {
+      target = joint.bodyA.node as? Enemy
     }
-    target.removeFromParent()
-    let dx = touchLocation.x - position.x
-    let dy = touchLocation.y - position.y
-    let jumpVector = CGVector(dx: dx / 3, dy: dy / 3)
-    physicsBody.applyImpulse(jumpVector)
-    isTargetDestroyed(true)
+    // Launch player in direction of tap once enemy is destroyed
+    target?.damage(1) { isEnemyDestroyed in
+      let dx = touchLocation.x - position.x
+      let dy = touchLocation.y - position.y
+      let jumpVector = CGVector(dx: dx / 3, dy: dy / 3)
+      physicsBody.applyImpulse(jumpVector)
+      hasPlayerDestroyedTarget(isEnemyDestroyed)
+    }
   }
 }
