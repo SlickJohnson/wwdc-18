@@ -22,8 +22,8 @@ public class Player: SKSpriteNode {
     physicsBody = SKPhysicsBody(rectangleOf: size)
     physicsBody!.affectedByGravity = true
     physicsBody!.categoryBitMask = PhysicsCategory.player
-    physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.dummy
-    physicsBody!.contactTestBitMask = PhysicsCategory.dummy
+    physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.enemy
+    physicsBody!.contactTestBitMask = PhysicsCategory.enemy
   }
 
   required public init?(coder aDecoder: NSCoder) {

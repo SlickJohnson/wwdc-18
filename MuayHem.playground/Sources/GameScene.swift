@@ -17,7 +17,7 @@ public class GameScene: SKScene {
   /// The camera's scale.
   var camScale: CGFloat = 2
   /// The object that acts as a dummy enemy in the game scene.
-  var dummy: SKShapeNode!
+  var enemy: Enemy!
 
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
@@ -74,16 +74,8 @@ private extension GameScene {
 
   /// Creates the dummy objects to test player attaching mechanic.
   func makeDummy() {
-    dummy = SKShapeNode(rect: CGRect(x: -40, y: -40, width: 80, height: 80 ))
-    dummy.fillColor = .orange
-    let physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 80, height: 80))
-    physicsBody.categoryBitMask = PhysicsCategory.dummy
-    physicsBody.collisionBitMask = PhysicsCategory.player
-    physicsBody.contactTestBitMask = PhysicsCategory.player
-    physicsBody.affectedByGravity = false
-    dummy.physicsBody = physicsBody
-    addChild(dummy)
-    dummy.position = CGPoint(x: size.width / 2, y: size.height / 1.25)
+    enemy = Enemy(size: CGSize(width: 80, height: 80), position: CGPoint(x: size.width / 2, y: size.height / 1.25))
+    addChild(enemy)
   }
 
   func setupCam() {
@@ -115,7 +107,7 @@ extension GameScene: SKPhysicsContactDelegate {
     let collision = bodyA.categoryBitMask | bodyB.categoryBitMask
 
     switch collision {
-    case PhysicsCategory.player | PhysicsCategory.dummy:
+    case PhysicsCategory.player | PhysicsCategory.enemy:
       guard player.joint == nil else { return }
       let pinJoint = SKPhysicsJointPin.joint(withBodyA: bodyA, bodyB: bodyB, anchor: contact.contactPoint)
       scene?.physicsWorld.add(pinJoint)
