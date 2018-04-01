@@ -81,7 +81,6 @@ private extension GameScene {
     physicsBody.collisionBitMask = PhysicsCategory.player
     physicsBody.contactTestBitMask = PhysicsCategory.player
     physicsBody.affectedByGravity = false
-    physicsBody.isDynamic = false
     dummy.physicsBody = physicsBody
     addChild(dummy)
     dummy.position = CGPoint(x: size.width / 2, y: size.height / 1.25)
@@ -111,11 +110,16 @@ private extension GameScene {
 // MARK: - SKPhysicsContactDelegate
 extension GameScene: SKPhysicsContactDelegate {
   public func didBegin(_ contact: SKPhysicsContact) {
-    let collision = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
+    let bodyA = contact.bodyA
+    let bodyB = contact.bodyB
+    let collision = bodyA.categoryBitMask | bodyB.categoryBitMask
 
     switch collision {
     case PhysicsCategory.player | PhysicsCategory.dummy:
-      print("*** Player Hit Block ***")
+      let pinJoint = SKPhysicsJointPin.joint(withBodyA: bodyA,
+                                             bodyB: bodyB,
+                                             anchor: contact.contactPoint)
+      scene?.physicsWorld.add(pinJoint)
     default:
       print("Hit something else")
     }
@@ -138,6 +142,3 @@ public extension GameScene {
     touchDown = false
   }
 }
-
-
-
