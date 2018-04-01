@@ -116,6 +116,7 @@ extension GameScene: SKPhysicsContactDelegate {
 
     switch collision {
     case PhysicsCategory.player | PhysicsCategory.dummy:
+      guard player.joint == nil else { return }
       let pinJoint = SKPhysicsJointPin.joint(withBodyA: bodyA, bodyB: bodyB, anchor: contact.contactPoint)
       scene?.physicsWorld.add(pinJoint)
       player.joint = pinJoint
@@ -125,18 +126,6 @@ extension GameScene: SKPhysicsContactDelegate {
   }
 
   public func didEnd(_ contact: SKPhysicsContact) {
-    let bodyA = contact.bodyA
-    let bodyB = contact.bodyB
-    let seperation = bodyA.categoryBitMask | bodyB.categoryBitMask
-
-    switch seperation {
-    case PhysicsCategory.player | PhysicsCategory.dummy:
-      guard let playerJoint = player.joint else { return }
-      scene?.physicsWorld.remove(playerJoint)
-      player.joint = nil
-    default:
-      print("Hit something else")
-    }
   }
 }
 
@@ -146,9 +135,14 @@ public extension GameScene {
     guard let touch = touches.first else { return }
     let touchLocation = touch.location(in: self)
     touchDown = true
-    player.jump(to: touchLocation)
     if player.isAttached {
-      player.attack()
+      player.attack(touchLocation) { isTargetDestroyed in
+        guard let playerJoint = player.joint else { return }
+        scene?.physicsWorld.remove(playerJoint)
+        player.joint = nil
+      }
+    } else {
+      player.jump(to: touchLocation)
     }
   }
 
