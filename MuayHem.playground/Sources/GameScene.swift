@@ -22,6 +22,7 @@ public class GameScene: SKScene {
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
     backgroundColor = color
+    physicsWorld.contactDelegate = self
     setupScene()
   }
 
@@ -38,7 +39,7 @@ public class GameScene: SKScene {
   }
 }
 
-// MARK: - Helper methods before
+// MARK: - Helper methods
 private extension GameScene {
   // MARK: Setup
   /// Configure the game scene with a ground and player.
@@ -107,6 +108,20 @@ private extension GameScene {
   }
 }
 
+// MARK: - SKPhysicsContactDelegate
+extension GameScene: SKPhysicsContactDelegate {
+  public func didBegin(_ contact: SKPhysicsContact) {
+    let collision = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
+
+    switch collision {
+    case PhysicsCategory.player | PhysicsCategory.dummy:
+      print("*** Player Hit Block ***")
+    default:
+      print("Hit something else")
+    }
+  }
+}
+
 // MARK: - Game controls
 public extension GameScene {
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -123,5 +138,6 @@ public extension GameScene {
     touchDown = false
   }
 }
+
 
 
