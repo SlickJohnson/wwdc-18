@@ -24,6 +24,7 @@ public class Player: SKSpriteNode {
     physicsBody!.categoryBitMask = PhysicsCategory.player
     physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.enemy
     physicsBody!.contactTestBitMask = PhysicsCategory.enemy
+    physicsBody!.usesPreciseCollisionDetection = true
   }
 
   required public init?(coder aDecoder: NSCoder) {
@@ -58,10 +59,17 @@ public extension Player {
       target = joint.bodyA.node as? Enemy
     }
     // Launch player in direction of tap once enemy is destroyed
-    target?.damage(1) { isEnemyDestroyed in
+    target?.damage(size.width) { isEnemyDestroyed in
       let dx = touchLocation.x - position.x
       let dy = touchLocation.y - position.y
-      let jumpVector = CGVector(dx: dx / 3, dy: dy / 3)
+      var jumpVector: CGVector = .zero
+
+      if isEnemyDestroyed {
+        jumpVector = CGVector(dx: dx / 2.25, dy: dy / 2.25)
+      } else {
+        jumpVector = CGVector(dx: dx / 2.5, dy: dy / 2.5)
+      }
+
       physicsBody.applyImpulse(jumpVector)
       hasPlayerDestroyedTarget(isEnemyDestroyed)
     }
