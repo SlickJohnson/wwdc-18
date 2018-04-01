@@ -5,7 +5,7 @@ public class GameScene: SKScene {
   /// The SKShapeNode that represents the ground at the bottom of game screen.
   var ground: SKShapeNode!
   /// The SKShapeNode that represents the player and responds to touch events.
-  var player: SKShapeNode!
+  var player: Player!
   /// The multiplier that will be applied to player's gravity to create "heaviness".
   let fallMultiplier: CGFloat = 1.3
   /// The multiplier that will be applied to player's gravity to elongate player jump.
@@ -64,19 +64,7 @@ private extension GameScene {
 
   /// Creates and adds the SKShapeNode for the player.
   func makePlayer() {
-    // Create the SKShapeNode
-    let playerRadius: CGFloat = 20
-    player = SKShapeNode(circleOfRadius: playerRadius)
-    player.position = CGPoint(x: size.width / 2, y: size.height / 2)
-    player.fillColor = .red
-    player.strokeColor = .red
-    // Configure SKPhysicsBody
-    let physicsBody = SKPhysicsBody(circleOfRadius: playerRadius)
-    physicsBody.affectedByGravity = true
-    physicsBody.categoryBitMask = 0
-    physicsBody.collisionBitMask = 1
-    player.physicsBody = physicsBody
-
+    player = Player(size: CGSize(width: 40, height: 40), position: CGPoint(x: size.width / 2, y: size.height / 2))
     addChild(player)
   }
 
@@ -107,15 +95,7 @@ public extension GameScene {
     guard let touch = touches.first else { return }
     let touchLocation = touch.location(in: self)
     touchDown = true
-    // Calculate angle between player and finger.
-    let dx = touchLocation.x - player.position.x
-    let dy = touchLocation.y - player.position.y
-
-    guard let playerPhysicsBody = player.physicsBody else { return }
-    guard playerPhysicsBody.velocity.dy >= 0 else { return }
-
-    let jumpVector = CGVector(dx: dx * 12, dy: dy * 12)
-    playerPhysicsBody.applyForce(jumpVector)
+    player.jump(to: touchLocation)
   }
 
   public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -125,6 +105,5 @@ public extension GameScene {
     touchDown = false
   }
 }
-
 
 
