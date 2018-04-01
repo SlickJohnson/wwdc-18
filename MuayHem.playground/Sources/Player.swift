@@ -17,17 +17,26 @@ public class Player: SKSpriteNode {
       isAttached = joint != nil
     }
   }
+  /// Player presence.
+  var gravity: SKFieldNode!
 
   public init(size: CGSize, position: CGPoint) {
     super.init(texture: nil, color: .red, size: size)
     self.position = position
-    // Configure SKPhysicsBody
+    // Add gravity field to attrack enemies.
+    gravity = SKFieldNode.vortexField()
+    gravity.strength = 30
+    gravity.categoryBitMask = PhysicsCategory.playerField
+    gravity.region = SKRegion(radius: 500)
+    addChild(gravity)
+    // Configure SKPhysicsBody.
     physicsBody = SKPhysicsBody(rectangleOf: size)
     physicsBody!.affectedByGravity = true
     physicsBody!.categoryBitMask = PhysicsCategory.player
     physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.enemy
     physicsBody!.contactTestBitMask = PhysicsCategory.enemy
     physicsBody!.usesPreciseCollisionDetection = true
+    physicsBody!.fieldBitMask = PhysicsCategory.player
   }
 
   required public init?(coder aDecoder: NSCoder) {
@@ -67,12 +76,14 @@ public extension Player {
     }
     // Launch player in direction of tap once enemy is destroyed
     target?.damage(size.width) { isEnemyDestroyed in
+
       let dx = touchLocation.x - position.x
       let dy = touchLocation.y - position.y
       let angle = atan2(dy, dx)
       let attackVelocityX = cos(angle) * attackForce
       let attackVeloctyY = sin(angle) * attackForce
       let attackImpulseVector = CGVector(dx: attackVelocityX, dy: attackVeloctyY)
+      gravity.strength *= -1
       if isEnemyDestroyed {
         attackForce = 120
       }

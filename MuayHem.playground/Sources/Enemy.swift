@@ -26,6 +26,8 @@ public class Enemy: SKSpriteNode {
     physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.enemy | PhysicsCategory.player
     physicsBody!.contactTestBitMask = PhysicsCategory.player
     physicsBody!.usesPreciseCollisionDetection = true
+    physicsBody!.mass = 2
+    physicsBody!.fieldBitMask = PhysicsCategory.playerField
   }
 
   required public init?(coder aDecoder: NSCoder) {
