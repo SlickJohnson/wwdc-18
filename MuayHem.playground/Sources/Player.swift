@@ -6,8 +6,11 @@ public class Player: SKSpriteNode {
   var isJumping: Bool = false
   /// Keeps track of whether or not the player is attached to another body.
   var isAttached: Bool = false
-  /// The amount of force the player uses to move around.
-  var force: CGFloat = 12
+  /// The amount of force the player uses to jump around.
+  var jumpForce: CGFloat = 4200
+  var angleForce: CGFloat = 0.5
+  /// The amount of force the player uses to attack an enemy.
+  var attackForce: CGFloat = 100
   /// Keeps track of the joint the player is using to attach to an object.
   var joint: SKPhysicsJointPin? {
     didSet {
@@ -39,12 +42,16 @@ public extension Player {
   /// - Parameter location: The CGPoint the player will attempt to jump towards.
   public func jump(to location: CGPoint, multiplier: CGFloat = 1) {
     guard let physicsBody = physicsBody else { return }
-    guard physicsBody.velocity.dy >= 0 else { return }
     // Calculate angle between player and finger.
     let dx = location.x - position.x
     let dy = location.y - position.y
-    let jumpVector = CGVector(dx: dx * force * multiplier, dy: dy * force * multiplier)
+    let angle = atan2(dy, dx)
+    let jumpVeloctiyX = cos(angle) * jumpForce * multiplier
+    let jumpVelocityY = sin(angle) * jumpForce * multiplier
+    let jumpVector = CGVector(dx: jumpVeloctiyX, dy: jumpVelocityY)
+    let angularVeloicty = -cos(angle) * 0.01
     physicsBody.applyForce(jumpVector)
+    physicsBody.applyAngularImpulse(angularVeloicty)
   }
 
   /// Attacks the current node that the player is attached to.
@@ -62,15 +69,14 @@ public extension Player {
     target?.damage(size.width) { isEnemyDestroyed in
       let dx = touchLocation.x - position.x
       let dy = touchLocation.y - position.y
-      var jumpVector: CGVector = .zero
-
+      let angle = atan2(dy, dx)
+      let attackVelocityX = cos(angle) * attackForce
+      let attackVeloctyY = sin(angle) * attackForce
+      let attackImpulseVector = CGVector(dx: attackVelocityX, dy: attackVeloctyY)
       if isEnemyDestroyed {
-        jumpVector = CGVector(dx: dx / 2.25, dy: dy / 2.25)
-      } else {
-        jumpVector = CGVector(dx: dx / 2.5, dy: dy / 2.5)
+        attackForce = 120
       }
-
-      physicsBody.applyImpulse(jumpVector)
+      physicsBody.applyImpulse(attackImpulseVector)
       hasPlayerDestroyedTarget(isEnemyDestroyed)
     }
   }
