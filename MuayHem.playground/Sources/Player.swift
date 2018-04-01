@@ -1,3 +1,11 @@
+//
+//  Player.swift
+//  wwdc
+//
+//  Created by Willie Johnson on 3/30/18.
+//  Copyright © 2018 Willie Johnson. All rights reserved.
+//
+
 import Foundation
 import SpriteKit
 
@@ -11,8 +19,9 @@ public class Player: SKSpriteNode {
     // Configure SKPhysicsBody
     physicsBody = SKPhysicsBody(rectangleOf: size)
     physicsBody!.affectedByGravity = true
-    physicsBody!.categoryBitMask = 0
-    physicsBody!.collisionBitMask = 1
+    physicsBody!.categoryBitMask = PhysicsCategory.player
+    physicsBody!.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.dummy
+    physicsBody!.contactTestBitMask = PhysicsCategory.dummy
   }
 
   required public init?(coder aDecoder: NSCoder) {

@@ -12,10 +12,12 @@ public class GameScene: SKScene {
   let lowJumpMultiplier: CGFloat = 1.0425
   /// Bool that keeps track of whether or not a finger is touching the screen.
   var touchDown: Bool = false
-  /// The cam used to control the zoom levels
+  /// The cam used to control the zoom levels.
   var cam: SKCameraNode!
-  /// The camera's scale
+  /// The camera's scale.
   var camScale: CGFloat = 2
+  /// The object that acts as a dummy enemy in the game scene.
+  var dummy: SKShapeNode!
 
   public init(size: CGSize, color: SKColor) {
     super.init(size: size)
@@ -36,13 +38,14 @@ public class GameScene: SKScene {
   }
 }
 
-// MARK: - Helper methodsbefore
+// MARK: - Helper methods before
 private extension GameScene {
   // MARK: Setup
   /// Configure the game scene with a ground and player.
   func setupScene() {
     makeGround()
     makePlayer()
+    makeDummy()
     setupCam()
   }
 
@@ -56,8 +59,8 @@ private extension GameScene {
     // Configure SKPhysicsBody
     let physicsBody = SKPhysicsBody(rectangleOf: groundSize, center: groundCenter)
     physicsBody.isDynamic = false
-    physicsBody.categoryBitMask = 1
-    physicsBody.collisionBitMask = 0
+    physicsBody.categoryBitMask = PhysicsCategory.ground
+    physicsBody.collisionBitMask = PhysicsCategory.player
     ground.physicsBody = physicsBody
     addChild(ground)
   }
@@ -66,6 +69,21 @@ private extension GameScene {
   func makePlayer() {
     player = Player(size: CGSize(width: 40, height: 40), position: CGPoint(x: size.width / 2, y: size.height / 2))
     addChild(player)
+  }
+
+  /// Creates the dummy objects to test player attaching mechanic.
+  func makeDummy() {
+    dummy = SKShapeNode(rect: CGRect(x: -40, y: -40, width: 80, height: 80 ))
+    dummy.fillColor = .orange
+    let physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 80, height: 80))
+    physicsBody.categoryBitMask = PhysicsCategory.dummy
+    physicsBody.collisionBitMask = PhysicsCategory.player
+    physicsBody.contactTestBitMask = PhysicsCategory.player
+    physicsBody.affectedByGravity = false
+    physicsBody.isDynamic = false
+    dummy.physicsBody = physicsBody
+    addChild(dummy)
+    dummy.position = CGPoint(x: size.width / 2, y: size.height / 1.25)
   }
 
   func setupCam() {
