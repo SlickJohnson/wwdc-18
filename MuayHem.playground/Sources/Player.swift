@@ -1,17 +1,17 @@
-//
-//  Player.swift
-//  wwdc
-//
-//  Created by Willie Johnson on 3/30/18.
-//  Copyright © 2018 Willie Johnson. All rights reserved.
-//
-
 import Foundation
 import SpriteKit
 
 public class Player: SKSpriteNode {
   /// Keeps track of whether or not the player is jumping.
   var isJumping: Bool = false
+  /// Keeps track of whether or not the player is attached to another body.
+  var isAttached: Bool = false
+  /// Keeps track of the joint the player is using to attach to an object.
+  var joint: SKPhysicsJointPin? {
+    didSet {
+      isAttached = joint != nil
+    }
+  }
 
   public init(size: CGSize, position: CGPoint) {
     super.init(texture: nil, color: .red, size: size)
@@ -42,5 +42,17 @@ public extension Player {
     guard physicsBody.velocity.dy >= 0 else { return }
     let jumpVector = CGVector(dx: dx * 12, dy: dy * 12)
     physicsBody.applyForce(jumpVector)
+  }
+
+  /// Attacks the current node that the player is attached to.
+  public func attack() {
+    guard let joint = joint else { return }
+    var target: SKNode!
+    if joint.bodyA.node == self {
+      target = joint.bodyB.node
+    } else {
+      target = joint.bodyA.node
+    }
+    target.removeFromParent()
   }
 }

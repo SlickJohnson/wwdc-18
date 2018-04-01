@@ -116,10 +116,24 @@ extension GameScene: SKPhysicsContactDelegate {
 
     switch collision {
     case PhysicsCategory.player | PhysicsCategory.dummy:
-      let pinJoint = SKPhysicsJointPin.joint(withBodyA: bodyA,
-                                             bodyB: bodyB,
-                                             anchor: contact.contactPoint)
+      let pinJoint = SKPhysicsJointPin.joint(withBodyA: bodyA, bodyB: bodyB, anchor: contact.contactPoint)
       scene?.physicsWorld.add(pinJoint)
+      player.joint = pinJoint
+    default:
+      print("Hit something else")
+    }
+  }
+
+  public func didEnd(_ contact: SKPhysicsContact) {
+    let bodyA = contact.bodyA
+    let bodyB = contact.bodyB
+    let seperation = bodyA.categoryBitMask | bodyB.categoryBitMask
+
+    switch seperation {
+    case PhysicsCategory.player | PhysicsCategory.dummy:
+      guard let playerJoint = player.joint else { return }
+      scene?.physicsWorld.remove(playerJoint)
+      player.joint = nil
     default:
       print("Hit something else")
     }
@@ -133,6 +147,9 @@ public extension GameScene {
     let touchLocation = touch.location(in: self)
     touchDown = true
     player.jump(to: touchLocation)
+    if player.isAttached {
+      player.attack()
+    }
   }
 
   public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
